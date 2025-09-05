@@ -91,6 +91,7 @@ def query_ollama(prompt_text):
         "model": CURRENT_OLLAMA_MODEL, # Use the current model (potentially overridden by CLI)
         "prompt": full_prompt,
         "stream": False,
+        "keep_alive": 0,
         "options": {
             "temperature": 0.1,
             "stop": ["\nUser:", "\nAssistant:"]
