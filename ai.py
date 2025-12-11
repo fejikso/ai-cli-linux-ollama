@@ -199,7 +199,8 @@ def main():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter # Shows default values in help
     )
     parser.add_argument("-p", "--prompt", required=True, help="Natural language description of the desired command.")
-    parser.add_argument("-y", "--yes", action="store_true", help="Skip confirmation for destructive commands (USE WITH EXTREME CAUTION!).")
+    parser.add_argument("-i", "--interactive", action="store_true", help="Ask for confirmation before executing the command.")
+    parser.add_argument("-y", "--yes", action="store_true", help="Skip confirmation when used with -i (USE WITH EXTREME CAUTION!).")
     parser.add_argument("--model", default=OLLAMA_DEFAULT_MODEL,
                         help="Ollama model name to use for this execution.")
 
@@ -217,23 +218,40 @@ def main():
 
     print(f"\n Suggested command: \033[1;34m{command_to_run}\033[0m") # Blue and bold
 
-    destructive = is_destructive(command_to_run)
+    # By default, don't execute commands unless -i flag is provided
     execute = False
-    if destructive and not args.yes:
-        try:
-            confirm = input(f"\n\033[1;31m WARNING!\033[0m This command appears destructive or requires elevated privileges.\n Do you want to execute it anyway? (y/N): ")
-            if confirm.lower() == 'y':
-                execute = True
-            else:
-                print(" Execution cancelled by user.")
-        except (EOFError, KeyboardInterrupt):
-             print("\n Execution cancelled.")
-             sys.exit(0)
-    elif destructive and args.yes:
-         print("\n\033[1;31m WARNING!\033[0m Executing destructive command without confirmation due to -y flag.")
-         execute = True
+    
+    if args.interactive:
+        destructive = is_destructive(command_to_run)
+        
+        if destructive and not args.yes:
+            try:
+                confirm = input(f"\n\033[1;31m WARNING!\033[0m This command appears destructive or requires elevated privileges.\n Do you want to execute it anyway? (y/N): ")
+                if confirm.lower() == 'y':
+                    execute = True
+                else:
+                    print(" Execution cancelled by user.")
+            except (EOFError, KeyboardInterrupt):
+                print("\n Execution cancelled.")
+                sys.exit(0)
+        elif destructive and args.yes:
+            print("\n\033[1;31m WARNING!\033[0m Executing destructive command without confirmation due to -y flag.")
+            execute = True
+        elif not args.yes:
+            try:
+                confirm = input(f"\n Do you want to execute this command? (y/N): ")
+                if confirm.lower() == 'y':
+                    execute = True
+                else:
+                    print(" Execution cancelled by user.")
+            except (EOFError, KeyboardInterrupt):
+                print("\n Execution cancelled.")
+                sys.exit(0)
+        else:
+            # -i and -y both provided, execute without confirmation
+            execute = True
     else:
-        execute = True
+        print("\n Command not executed. Use -i flag to execute with confirmation.")
 
     if execute:
         execute_command(command_to_run)
