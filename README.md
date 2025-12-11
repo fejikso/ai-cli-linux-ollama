@@ -6,7 +6,8 @@ A simple command-line tool that uses a local **Ollama** model to translate natur
 
 *   **Natural Language to Command:** Describe what you want to do, and the AI suggests the Linux command.
 *   **Ollama Integration:** Leverages locally running Ollama models (like `gemma3`, `llama3.2`, etc.).
-*   **Command Execution:** Can directly execute the generated command.
+*   **Safe by Default:** Commands are displayed but **not executed** unless you explicitly use the `-i` flag.
+*   **Interactive Execution:** Use `-i` to execute commands with confirmation prompts.
 *   **Safety Confirmation:** Prompts for user confirmation before executing potentially destructive commands (e.g., `rm`, `kill`, `sudo`).
 *   **Configurable:** Set your default Ollama model and API endpoint via an `.env` file.
 *   **Command-line Interface:** Easy to use via `ai -p "your prompt"`.
@@ -97,9 +98,11 @@ ai -p "YOUR PROMPT IN NATURAL LANGUAGE" [OPTIONS]
 
 **-p, --prompt (Required):** The description of the command you want (e.g., "list files sorted by size").
 
+**-i, --interactive:** Ask for confirmation before executing the generated command. **Required to execute commands** - by default, commands are only displayed, not executed.
+
 **--model MODEL_NAME:** Specify an Ollama model to use for this specific execution, overriding the default from .env. (e.g., ai --model llama3 -p "show current processes"). The default value is loaded from your .env file.
 
-**-y, --yes:** DANGEROUS! Automatically confirm and execute potentially destructive commands without prompting. Use with extreme caution.
+**-y, --yes:** DANGEROUS! When used with `-i`, skips confirmation prompts and executes commands immediately. Use with extreme caution.
 
 ## Usage on the project workspace:
 
@@ -116,11 +119,13 @@ python ai.py -p "YOUR PROMPT IN NATURAL LANGUAGE" [OPTIONS]
 
 The AI might misunderstand your prompt and generate unintended or harmful commands.
 
+**By default, commands are NOT executed** - they are only displayed for your review. You must use the `-i` flag to execute commands.
+
 Always review the suggested command carefully before confirming execution.
 
 The list of **DESTRUCTIVE_COMMANDS** in the script is a safeguard but **may not be exhaustive**. Commands involving sudo are always flagged.
 
-Use the -y flag with EXTREME CAUTION. You are solely responsible for the consequences of the commands executed.
+Use the `-y` flag with EXTREME CAUTION. You are solely responsible for the consequences of the commands executed.
 
 ## Contributing
 
